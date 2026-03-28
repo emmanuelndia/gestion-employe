@@ -5,37 +5,86 @@
 
 generator client {
   provider = "prisma-client-js"
-/*   output   = "../generated/prisma"*/
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // Utilisateur 
 model User {
-  id            Int      @id @default(autoincrement())
-  name          String
-  password      String
-  role          Role     @default(USER)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id         Int       @id @default(autoincrement())
+  name       String    @unique
+  password   String
+  role       Role      @default(USER)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  employeeId Int?      @unique
+  employee   Employee? @relation(fields: [employeeId], references: [id])
 }
-             
+
 // Employé       
-model Employee { 
-  id             Int      @id @default(autoincrement())
+model Employee {
+  id             Int        @id @default(autoincrement())
   nom            String
   prenom         String
+  sexe           Sexe       @default(HOMME)
   date_naissance DateTime
   contact        String
   email          String
   fonction       String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  conges         conge[]
+  presences      presence[]
+  User           User?
+}
+
+// Congé
+model conge {
+  id         Int         @id @default(autoincrement())
+  employeeId Int
+  employee   Employee    @relation(fields: [employeeId], references: [id])
+  date_debut DateTime
+  date_fin   DateTime
+  motif      String
+  status     congeStatus @default(en_attente)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+// Présence
+model presence {
+  id           Int            @id @default(autoincrement())
+  employeeId   Int
+  employee     Employee       @relation(fields: [employeeId], references: [id])
+  date         DateTime       @default(now())
+  date_arrivee DateTime?
+  date_depart  DateTime?
+  status       presenceStatus @default(present)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+enum presenceStatus {
+  present
+  absent
+  retard
+}
+
+enum congeStatus {
+  accepte
+  refuse
+  en_attente
 }
 
 enum Role {
   USER
   ADMIN
-}  
+}
+
+enum Sexe {
+  HOMME
+  FEMME
+}

@@ -19,24 +19,47 @@ export class AuthService {
 
 
     // Fonction pour génerer le JWT
-    private async authentificateUser({id} : {id : number}) {
-        const payload = {id};
-        return { access_token : await this.jwtService.sign(payload)}
+    private async authentificateUser({ id, role, employeeId }: { id: number; role: string; employeeId?: number | null }) {
+        const payload = { id, role, employeeId };
+        return { access_token: this.jwtService.sign(payload) }
     }
 
     async login(authBody: AuthBodyDto) {
-        const { id, name, password } = authBody;
+        const { name, password } = authBody;
+        console.log(name, password);
 
-        const existingUser = await this.usersService.getUserById(id);
+        const existingUser = await this.usersService.findByName(name);
+        console.log(existingUser);
 
         if(!existingUser) throw new UnauthorizedException({error : "Utilisateur introuvable"})
 
         const isPasswordValid = await this.isPasswordValid(password, existingUser.password)
-        if(!isPasswordValid) throw new UnauthorizedException({error : "Utilisateur introuvable"})
+        if(!isPasswordValid) throw new UnauthorizedException({error : "Mot de passe incorrect"})
 
-        return this.authentificateUser({id: existingUser.id})
+        const token = await this.authentificateUser({ 
+            id: existingUser.id, 
+            role: existingUser.role, 
+            employeeId: (existingUser as any).employeeId // cast to any temporarily until prisma client regenerated
+        })
+
+        return { 
+            message: "Utilisateur connecté avec succès",
+            token: token.access_token,
+            user: {
+                id: existingUser.id,
+                name: existingUser.name,
+                role: existingUser.role
+            }
+        }
 
     }
 
-    /* async validateUser(user: User) {} */
+    async getProfile(userId: number) {
+        const user = await this.usersService.getUserById(userId);
+        console.log(user);
+
+        if(!user) throw new UnauthorizedException({error : "Utilisateur introuvable"})
+
+        return {userName: user.name, userId: user.id, userRole: user.role};
+    }
 }

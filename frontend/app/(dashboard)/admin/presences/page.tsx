@@ -11,6 +11,7 @@ import PresenceFormModal from '@/components/features/admin/presences/PresenceFor
 import PresenceStats from '@/components/features/admin/presences/PresenceStats';
 import { PresenceRow } from '@/components/features/admin/presences/types';
 import { EmployeeRow } from '@/components/features/admin/employees/types';
+import { API_BASE_URL } from '@/lib/api-config';
 
 const toast = Swal.mixin({
     toast: true,
@@ -55,9 +56,9 @@ export default function AdminPresencesPage() {
           };
 
           const [jsonP, jsonE, jsonS] = await Promise.all([
-            f(`http://localhost:4000/api/presence?${query.toString()}`),
-            f('http://localhost:4000/api/employee'),
-            f(`http://localhost:4000/api/presence/stats?${query.toString()}`)
+            f(`${API_BASE_URL}/presence?${query.toString()}`),
+            f(`${API_BASE_URL}/employee`),
+            f(`${API_BASE_URL}/presence/stats?${query.toString()}`)
           ]);
           
           setItems(jsonP || []);
@@ -81,7 +82,7 @@ export default function AdminPresencesPage() {
         setSubmitting(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:4000/api/presence', {
+            const res = await fetch(`${API_BASE_URL}/presence`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -124,7 +125,7 @@ export default function AdminPresencesPage() {
         if (result.isConfirmed) {
             try {
                 const token = localStorage.getItem('token');
-                await fetch(`http://localhost:4000/api/presence/${id}`, {
+                await fetch(`${API_BASE_URL}/presence/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` },
                 });

@@ -8,6 +8,7 @@ import AdminSection from '@/components/shared/admin/AdminSection';
 import UserCongeTable from '@/components/features/user/conges/UserCongeTable';
 import CongeFormModal from '@/components/features/user/conges/CongeFormModal';
 import { CongeRow } from '@/components/features/admin/conges/types';
+import { API_BASE_URL } from '@/lib/api-config';
 
 const toast = Swal.mixin({
     toast: true,
@@ -28,7 +29,7 @@ export default function UserCongesPage() {
         setLoading(true);
         try {
           const token = localStorage.getItem('token');
-          const res = await fetch('http://localhost:4000/api/conge/my-requests', { 
+          const res = await fetch(`${API_BASE_URL}/conge/my-requests`, { 
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const json = await res.json();
@@ -49,7 +50,7 @@ export default function UserCongesPage() {
         setSubmitting(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:4000/api/conge', {
+            const res = await fetch(`${API_BASE_URL}/conge`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',

@@ -8,6 +8,7 @@ import React, { useState } from "react";
 import Swal from "sweetalert2";
 import { BackButton } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/api-config";
 
 export default function SignUpForm() {
   const router = useRouter();
@@ -52,7 +53,7 @@ export default function SignUpForm() {
     setIsLoading(true);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/auth/users`, {
+      const res = await fetch(`${API_BASE_URL}/auth/users`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -146,14 +147,14 @@ export default function SignUpForm() {
       <div className="inline-flex items-center gap-3">
         <div className="h-10 w-10 rounded-2xl bg-zinc-900" />
         <div>
-          <div className="text-sm font-semibold tracking-tight text-zinc-900">NFC.PRO</div>
+          <div className="text-sm font-semibold tracking-tight text-zinc-900">EMPLOYEE PRO</div>
           <div className="text-xs text-zinc-500">Créer un compte</div>
         </div>
       </div>
 
       <div className="mt-8">
         <h1 className="text-3xl font-semibold tracking-tight text-zinc-900">Inscription</h1>
-        <p className="mt-2 text-sm text-zinc-600">Créez votre compte administrateur pour gérer les commandes.</p>
+        <p className="mt-2 text-sm text-zinc-600">Créez votre compte administrateur pour gérer vos employés.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-8">

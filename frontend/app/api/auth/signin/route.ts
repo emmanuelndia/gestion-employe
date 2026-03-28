@@ -1,4 +1,4 @@
-// app/api/auth/signin/route.ts
+import { API_BASE_URL } from '@/lib/api-config';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Appel au backend NestJS
-    const backendRes = await fetch('http://localhost:4000/auth/login', {
+    const backendRes = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: rawIdentifier, password }),

@@ -9,6 +9,7 @@ import { roleLabel, type UserRole, type UserRow } from '@/components/features/ad
 import AdminPageHeader from '@/components/shared/admin/AdminPageHeader';
 import AdminCard from '@/components/shared/admin/AdminCard';
 import AdminSection from '@/components/shared/admin/AdminSection';
+import { API_BASE_URL } from '@/lib/api-config';
 
 const toast = Swal.mixin({
   toast: true,
@@ -54,7 +55,7 @@ export default function AdminUsersPage() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:4000/api/users', { 
+      const res = await fetch(`${API_BASE_URL}/users`, { 
         cache: 'no-store',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -103,7 +104,7 @@ export default function AdminUsersPage() {
       if (editPassword.trim()) payload.password = editPassword;
 
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:4000/api/users/${encodeURIComponent(editId)}`, {
+      const res = await fetch(`${API_BASE_URL}/users/${encodeURIComponent(editId)}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -138,7 +139,7 @@ export default function AdminUsersPage() {
     setSubmitting(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:4000/api/users', {
+      const res = await fetch(`${API_BASE_URL}/users`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -186,7 +187,7 @@ export default function AdminUsersPage() {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:4000/api/users/${encodeURIComponent(id)}`, { 
+      const res = await fetch(`${API_BASE_URL}/users/${encodeURIComponent(id)}`, { 
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

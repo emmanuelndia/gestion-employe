@@ -5,6 +5,7 @@ import AdminSection from '@/components/shared/admin/AdminSection';
 import AdminCard from '@/components/shared/admin/AdminCard';
 import { CongeRow } from '@/components/features/admin/conges/types';
 import { CalenderIcon, CheckCircleIcon, TimeIcon, XCircleIcon } from '@/icons';
+import { API_BASE_URL } from '@/lib/api-config';
 
 export default function UserDashboard() {
     const [user, setUser] = useState<any>(null);
@@ -18,7 +19,7 @@ export default function UserDashboard() {
         const loadStats = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch('http://localhost:4000/api/conge/my-requests', {
+                const res = await fetch(`${API_BASE_URL}/conge/my-requests`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {

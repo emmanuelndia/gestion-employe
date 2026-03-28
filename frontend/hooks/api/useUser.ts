@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
  * - appelle GET /api/profile avec Authorization: Bearer <token>
  * - renvoie { user, loading, error } si besoin (ici on renvoie l'objet user pour compatibilité)
  */
+import { API_BASE_URL } from "@/lib/api-config";
+
 export default function useUser() {
   const [user, setUser] = useState<any | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -24,7 +26,7 @@ export default function useUser() {
     (async () => {
       try {
         setLoading(true);
-        const res = await fetch("http://localhost:4000/api/auth/profile", {
+        const res = await fetch(`${API_BASE_URL}/auth/profile`, {
           method: "GET",
           headers: {
             "Accept": "application/json",

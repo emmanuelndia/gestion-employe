@@ -8,6 +8,7 @@ import AdminCard from '@/components/shared/admin/AdminCard';
 import AdminSection from '@/components/shared/admin/AdminSection';
 import CongeTable from '@/components/features/admin/conges/CongeTable';
 import { CongeRow } from '@/components/features/admin/conges/types';
+import { API_BASE_URL } from '@/lib/api-config';
 
 const toast = Swal.mixin({
     toast: true,
@@ -27,7 +28,7 @@ export default function AdminCongesPage() {
         setLoading(true);
         try {
           const token = localStorage.getItem('token');
-          const res = await fetch('http://localhost:4000/api/conge', { 
+          const res = await fetch(`${API_BASE_URL}/conge`, { 
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const json = await res.json();
@@ -60,7 +61,7 @@ export default function AdminCongesPage() {
         if (result.isConfirmed) {
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch(`http://localhost:4000/api/conge/${id}/status`, {
+                const res = await fetch(`${API_BASE_URL}/conge/${id}/status`, {
                     method: 'PATCH',
                     headers: { 
                         'Content-Type': 'application/json',

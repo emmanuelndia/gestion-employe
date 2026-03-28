@@ -8,6 +8,8 @@ import React, { useState } from "react";
 import Swal from "sweetalert2";
 import { BackButton } from "@/components/ui/button";
 
+import { API_BASE_URL } from "@/lib/api-config";
+
 export default function SignInForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -37,7 +39,7 @@ export default function SignInForm() {
 
     try {
       // Appel à votre API d'authentification
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/auth/login`, {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

@@ -10,6 +10,7 @@ import AdminPageHeader from '@/components/shared/admin/AdminPageHeader';
 import AdminCard from '@/components/shared/admin/AdminCard';
 import AdminSection from '@/components/shared/admin/AdminSection';
 import { EmployeeRow } from '@/components/features/admin/employees/types';
+import { API_BASE_URL } from '@/lib/api-config';
 
 const toast = Swal.mixin({
     toast: true,
@@ -66,7 +67,7 @@ export default function AdminUsersPage() {
         setLoading(true);
         try {
           const token = localStorage.getItem('token');
-          const res = await fetch('http://localhost:4000/api/employee', { 
+          const res = await fetch(`${API_BASE_URL}/employee`, { 
             cache: 'no-store',
             headers: {
               'Authorization': `Bearer ${token}`
@@ -128,7 +129,7 @@ export default function AdminUsersPage() {
           };
     
           const token = localStorage.getItem('token');
-          const res = await fetch(`http://localhost:4000/api/employee/${encodeURIComponent(editId)}`, {
+          const res = await fetch(`${API_BASE_URL}/employee/${encodeURIComponent(editId)}`, {
             method: 'PUT',
             headers: { 
               'Content-Type': 'application/json',
@@ -172,7 +173,7 @@ export default function AdminUsersPage() {
         setSubmitting(true);
         try {
           const token = localStorage.getItem('token');
-          const res = await fetch('http://localhost:4000/api/employee', {
+          const res = await fetch(`${API_BASE_URL}/employee`, {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
@@ -228,7 +229,7 @@ export default function AdminUsersPage() {
     
         try {
           const token = localStorage.getItem('token');
-          const res = await fetch(`http://localhost:4000/api/employee/${encodeURIComponent(id)}`, { 
+          const res = await fetch(`${API_BASE_URL}/employee/${encodeURIComponent(id)}`, { 
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${token}`

@@ -33,11 +33,11 @@ export const adminNavigation: SidebarItem[] = [
     name: 'Utilisateurs',
     path: '/admin/users',
   },
-  {
+  /* {
     icon: ChartBarIcon,
     name: 'Statistiques',
     path: '/admin/statistics',
-  },
+  }, */
   {
     icon: CalenderIcon,
     name: 'Congés',
@@ -48,11 +48,11 @@ export const adminNavigation: SidebarItem[] = [
     name: 'Présences',
     path: '/admin/presences',
   },
-  {
+  /* {
     icon: SettingsIcon,
     name: 'Paramètres',
     path: '/admin/settings',
-  },
+  }, */
 ];
 
 

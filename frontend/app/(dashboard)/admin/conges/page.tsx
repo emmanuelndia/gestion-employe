@@ -23,6 +23,7 @@ export default function AdminCongesPage() {
     const [loading, setLoading] = useState(true);
     const [items, setItems] = useState<CongeRow[]>([]);
     const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+    const [mounted, setMounted] = useState(false);
 
     const load = async () => {
         setLoading(true);
@@ -42,10 +43,25 @@ export default function AdminCongesPage() {
     };
 
     useEffect(() => {
+        setMounted(true);
         const r = String(localStorage.getItem('role') || '').toUpperCase();
         setIsAdmin(r === 'ADMIN');
         load();
     }, []);
+
+    if (!mounted) {
+        return (
+            <AdminSection>
+                <AdminPageHeader
+                    title="Gestion des Congés"
+                    description="Consultez et validez les demandes de congés des employés."
+                />
+                <AdminCard>
+                    <div className="px-6 py-10 text-sm text-zinc-600">Chargement…</div>
+                </AdminCard>
+            </AdminSection>
+        );
+    }
 
     const onUpdateStatus = async (id: number, status: 'accepte' | 'refuse') => {
         const result = await Swal.fire({

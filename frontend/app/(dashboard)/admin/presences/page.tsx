@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import Swal from 'sweetalert2';
 import AdminGate from '@/components/features/admin/users/AdminGate';
 import AdminPageHeader from '@/components/shared/admin/AdminPageHeader';
 import AdminCard from '@/components/shared/admin/AdminCard';
@@ -12,15 +11,7 @@ import PresenceStats from '@/components/features/admin/presences/PresenceStats';
 import { PresenceRow } from '@/components/features/admin/presences/types';
 import { EmployeeRow } from '@/components/features/admin/employees/types';
 import { API_BASE_URL } from '@/lib/api-config';
-
-const toast = Swal.mixin({
-    toast: true,
-    position: 'top',
-    showConfirmButton: false,
-    timer: 1600,
-    timerProgressBar: true,
-    customClass: { container: 'z-[999999]' },
-});
+import { toast, confirmDialog } from '@/lib/toast';
 
 export default function AdminPresencesPage() {
     const [loading, setLoading] = useState(true);
@@ -39,36 +30,36 @@ export default function AdminPresencesPage() {
     const loadData = async () => {
         setLoading(true);
         try {
-          const token = localStorage.getItem('token');
-          const query = new URLSearchParams();
-          if (statusFilter) query.append('status', statusFilter);
-          if (startDate) query.append('startDate', startDate);
-          if (endDate) query.append('endDate', endDate);
+            const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+            const query = new URLSearchParams();
+            if (statusFilter) query.append('status', statusFilter);
+            if (startDate) query.append('startDate', startDate);
+            if (endDate) query.append('endDate', endDate);
 
-          const f = async (url: string) => {
-            const r = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
-            if (!r.ok) {
-              const text = await r.text();
-              console.error(`Fetch error ${url}: ${r.status} ${text}`);
-              throw new Error(`Erreur ${r.status} sur ${url}`);
-            }
-            return r.json();
-          };
+            const f = async (url: string) => {
+                const r = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!r.ok) {
+                    const text = await r.text();
+                    console.error(`Fetch error ${url}: ${r.status} ${text}`);
+                    throw new Error(`Erreur ${r.status} sur ${url}`);
+                }
+                return r.json();
+            };
 
-          const [jsonP, jsonE, jsonS] = await Promise.all([
-            f(`${API_BASE_URL}/presence?${query.toString()}`),
-            f(`${API_BASE_URL}/employee`),
-            f(`${API_BASE_URL}/presence/stats?${query.toString()}`)
-          ]);
-          
-          setItems(jsonP || []);
-          setEmployees(jsonE || []);
-          setStats(jsonS);
+            const [jsonP, jsonE, jsonS] = await Promise.all([
+                f(`${API_BASE_URL}/presence?${query.toString()}`),
+                f(`${API_BASE_URL}/employee`),
+                f(`${API_BASE_URL}/presence/stats?${query.toString()}`)
+            ]);
+
+            setItems(jsonP || []);
+            setEmployees(jsonE || []);
+            setStats(jsonS);
 
         } catch (e: any) {
-          console.error(e);
+            console.error(e);
         } finally {
-          setLoading(false);
+            setLoading(false);
         }
     };
 
@@ -84,18 +75,18 @@ export default function AdminPresencesPage() {
             const token = localStorage.getItem('token');
             const res = await fetch(`${API_BASE_URL}/presence`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(data),
             });
             if (!res.ok) throw new Error("Erreur lors de l'enregistrement");
-            toast.fire({ icon: 'success', title: 'Présence enregistrée' });
+            toast.success({ title: 'Présence enregistrée' });
             setIsModalOpen(false);
             loadData();
         } catch (e: any) {
-            Swal.fire({ icon: 'error', title: 'Erreur', text: e.message });
+            toast.error({ title: 'Erreur', text: e.message });
         } finally {
             setSubmitting(false);
         }
@@ -106,19 +97,17 @@ export default function AdminPresencesPage() {
         const start = new Date();
         if (period === 'week') start.setDate(start.getDate() - 7);
         else start.setMonth(start.getMonth() - 1);
-        
+
         setStartDate(start.toISOString().slice(0, 10));
         setEndDate(end.toISOString().slice(0, 10));
     };
 
     const onDelete = async (id: number) => {
-        const result = await Swal.fire({
+        const result = await confirmDialog({
             title: 'Supprimer ?',
             text: "Cette action est irréversible.",
             icon: 'warning',
-            showCancelButton: true,
             confirmButtonText: 'Supprimer',
-            cancelButtonText: 'Annuler',
             confirmButtonColor: '#ef4444',
         });
 
@@ -129,10 +118,10 @@ export default function AdminPresencesPage() {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` },
                 });
-                toast.fire({ icon: 'success', title: 'Supprimé' });
+                toast.success({ title: 'Supprimé' });
                 loadData();
             } catch (e: any) {
-                Swal.fire({ icon: 'error', title: 'Erreur', text: e.message });
+                toast.error({ title: 'Erreur', text: e.message });
             }
         }
     };
@@ -166,21 +155,21 @@ export default function AdminPresencesPage() {
                         </div>
 
                         <div className="flex flex-wrap items-center gap-3">
-                            <input 
-                                type="date" 
-                                value={startDate} 
+                            <input
+                                type="date"
+                                value={startDate}
                                 onChange={e => setStartDate(e.target.value)}
                                 className="text-xs border border-zinc-200 rounded-lg px-2 py-1.5 outline-none focus:ring-2 focus:ring-accent-500/20"
                             />
                             <span className="text-zinc-400 text-xs">à</span>
-                            <input 
-                                type="date" 
-                                value={endDate} 
+                            <input
+                                type="date"
+                                value={endDate}
                                 onChange={e => setEndDate(e.target.value)}
                                 className="text-xs border border-zinc-200 rounded-lg px-2 py-1.5 outline-none focus:ring-2 focus:ring-accent-500/20"
                             />
-                            <select 
-                                value={statusFilter} 
+                            <select
+                                value={statusFilter}
                                 onChange={e => setStatusFilter(e.target.value)}
                                 className="text-xs border border-zinc-200 rounded-lg px-2 py-1.5 outline-none focus:ring-2 focus:ring-accent-500/20"
                             >
@@ -203,10 +192,10 @@ export default function AdminPresencesPage() {
                     ) : null}
                 </AdminCard>
 
-                <PresenceFormModal 
-                    isOpen={isModalOpen} 
-                    onClose={() => setIsModalOpen(false)} 
-                    onSubmit={onSubmit} 
+                <PresenceFormModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onSubmit={onSubmit}
                     employees={employees}
                     isLoading={submitting}
                 />

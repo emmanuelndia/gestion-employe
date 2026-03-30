@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import Swal from 'sweetalert2';
+import { useEffect, useRef, useState } from 'react';
 import AdminGate from '@/components/features/admin/users/AdminGate';
 import AdminPageHeader from '@/components/shared/admin/AdminPageHeader';
 import AdminCard from '@/components/shared/admin/AdminCard';
@@ -10,35 +9,44 @@ import CongeTable from '@/components/features/admin/conges/CongeTable';
 import { CongeRow } from '@/components/features/admin/conges/types';
 import { API_BASE_URL } from '@/lib/api-config';
 
-const toast = Swal.mixin({
-    toast: true,
-    position: 'top',
-    showConfirmButton: false,
-    timer: 1600,
-    timerProgressBar: true,
-    customClass: { container: 'z-[999999]' },
-});
-
 export default function AdminCongesPage() {
     const [loading, setLoading] = useState(true);
     const [items, setItems] = useState<CongeRow[]>([]);
     const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
     const [mounted, setMounted] = useState(false);
 
+    // toast initialisé en lazy (import dynamique) pour éviter l'erreur de prerendering
+    const toastRef = useRef<any>(null);
+
+    const getToast = async () => {
+        if (toastRef.current) return toastRef.current;
+        const Swal = (await import('sweetalert2')).default;
+        toastRef.current = Swal.mixin({
+            toast: true,
+            position: 'top',
+            showConfirmButton: false,
+            timer: 1600,
+            timerProgressBar: true,
+            customClass: { container: 'z-[999999]' },
+        });
+        return toastRef.current;
+    };
+
     const load = async () => {
         setLoading(true);
         try {
-          const token = localStorage.getItem('token');
-          const res = await fetch(`${API_BASE_URL}/conge`, { 
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          const json = await res.json();
-          if (!res.ok) throw new Error(json?.message || 'Erreur lors du chargement');
-          setItems(json || []);
+            const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+            const res = await fetch(`${API_BASE_URL}/conge`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json?.message || 'Erreur lors du chargement');
+            setItems(json || []);
         } catch (e: any) {
-          Swal.fire({ icon: 'error', title: 'Erreur', text: e?.message });
+            const Swal = (await import('sweetalert2')).default;
+            Swal.fire({ icon: 'error', title: 'Erreur', text: e?.message });
         } finally {
-          setLoading(false);
+            setLoading(false);
         }
     };
 
@@ -64,6 +72,7 @@ export default function AdminCongesPage() {
     }
 
     const onUpdateStatus = async (id: number, status: 'accepte' | 'refuse') => {
+        const Swal = (await import('sweetalert2')).default;
         const result = await Swal.fire({
             title: status === 'accepte' ? 'Accepter la demande ?' : 'Refuser la demande ?',
             text: "Cette action sera immédiatement enregistrée.",
@@ -79,16 +88,18 @@ export default function AdminCongesPage() {
                 const token = localStorage.getItem('token');
                 const res = await fetch(`${API_BASE_URL}/conge/${id}/status`, {
                     method: 'PATCH',
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}` 
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({ status }),
                 });
                 if (!res.ok) throw new Error('Erreur lors de la mise à jour');
+                const toast = await getToast();
                 toast.fire({ icon: 'success', title: 'Statut mis à jour' });
                 load();
             } catch (e: any) {
+                const Swal = (await import('sweetalert2')).default;
                 Swal.fire({ icon: 'error', title: 'Erreur', text: e.message });
             }
         }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import Swal from 'sweetalert2';
 import AdminGate from '@/components/features/admin/users/AdminGate';
 import EmployeesTable from '@/components/features/admin/employees/EmployeeTable';
 import EmployeeFormModal from '@/components/features/admin/employees/EmployeeFormModal';
@@ -11,21 +10,9 @@ import AdminCard from '@/components/shared/admin/AdminCard';
 import AdminSection from '@/components/shared/admin/AdminSection';
 import { EmployeeRow } from '@/components/features/admin/employees/types';
 import { API_BASE_URL } from '@/lib/api-config';
+import { toast, confirmDialog } from '@/lib/toast';
 
-const toast = Swal.mixin({
-    toast: true,
-    position: 'top',
-    showConfirmButton: false,
-    timer: 1600,
-    timerProgressBar: true,
-    customClass: { container: 'z-[999999]' },
-    didOpen: () => {
-        const el = document.querySelector('.swal2-container') as HTMLElement | null;
-        if (el) el.style.zIndex = '999999';
-    },
-});
-
-export default function AdminUsersPage() {
+export default function AdminEmployeesPage() {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [items, setItems] = useState<EmployeeRow[]>([]);
@@ -38,10 +25,8 @@ export default function AdminUsersPage() {
     const [createSexe, setCreateSexe] = useState<EmployeeSexe>('HOMME');
     const [createDateNaissance, setCreateDateNaissance] = useState('');
     const [createContact, setCreateContact] = useState('');
-
     const [createEmail, setCreateEmail] = useState('');
     const [createFonction, setCreateFonction] = useState('');
-
 
     const [editOpen, setEditOpen] = useState(false);
     const [editId, setEditId] = useState<string>('');
@@ -50,7 +35,6 @@ export default function AdminUsersPage() {
     const [editSexe, setEditSexe] = useState<EmployeeSexe>('HOMME');
     const [editDateNaissance, setEditDateNaissance] = useState('');
     const [editContact, setContact] = useState('');
-
     const [editEmail, setEditEmail] = useState('');
     const [editFonction, setEditFonction] = useState('');
 
@@ -66,25 +50,18 @@ export default function AdminUsersPage() {
     const load = async () => {
         setLoading(true);
         try {
-          const token = localStorage.getItem('token');
-          const res = await fetch(`${API_BASE_URL}/employee`, { 
-            cache: 'no-store',
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          const json = await res.json();
-          if (!res.ok) throw new Error(json?.error || 'Impossible de charger les utilisateurs');
-          setItems((json ?? []) as EmployeeRow[]);
+            const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+            const res = await fetch(`${API_BASE_URL}/employee`, {
+                cache: 'no-store',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json?.error || 'Impossible de charger les employés');
+            setItems((json ?? []) as EmployeeRow[]);
         } catch (e: any) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Erreur',
-            text: e?.message || 'Erreur inconnue',
-            confirmButtonColor: '#465fff',
-          });
+            toast.error({ title: 'Erreur', text: e?.message || 'Erreur inconnue' });
         } finally {
-          setLoading(false);
+            setLoading(false);
         }
     };
 
@@ -112,53 +89,48 @@ export default function AdminUsersPage() {
 
     const onEdit = async () => {
         if (!editDateNaissance) {
-            Swal.fire({ icon: 'warning', title: 'Attention', text: 'La date de naissance est obligatoire' });
+            toast.warning({ title: 'Attention', text: 'La date de naissance est obligatoire' });
             return;
         }
 
         setSubmitting(true);
         try {
-          const payload: any = {
-            nom: editNom,
-            prenom: editPrenom,
-            sexe: editSexe,
-            date_naissance: editDateNaissance,
-            contact: editContact,
-            email: editEmail,
-            fonction: editFonction,
-          };
-    
-          const token = localStorage.getItem('token');
-          const res = await fetch(`${API_BASE_URL}/employee/${encodeURIComponent(editId)}`, {
-            method: 'PUT',
-            headers: { 
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}` 
-            },
-            body: JSON.stringify(payload),
-          });
-          const json = await res.json();
-          if (!res.ok) throw new Error(json?.error || json?.message || 'Impossible de modifier');
-    
-          toast.fire({ icon: 'success', title: 'Employé modifié' });
-    
-          setEditOpen(false);
-          setEditId('');
-          setEditNom('');
-          setEditPrenom('');
-          setEditSexe('HOMME');
-          setEditDateNaissance('');
-          setContact('');
-          setEditEmail('');
-          setEditFonction('');
-          await load();
+            const payload: any = {
+                nom: editNom,
+                prenom: editPrenom,
+                sexe: editSexe,
+                date_naissance: editDateNaissance,
+                contact: editContact,
+                email: editEmail,
+                fonction: editFonction,
+            };
+
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/employee/${encodeURIComponent(editId)}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(payload),
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json?.error || json?.message || 'Impossible de modifier');
+
+            toast.success({ title: 'Employé modifié' });
+
+            setEditOpen(false);
+            setEditId('');
+            setEditNom('');
+            setEditPrenom('');
+            setEditSexe('HOMME');
+            setEditDateNaissance('');
+            setContact('');
+            setEditEmail('');
+            setEditFonction('');
+            await load();
         } catch (e: any) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Erreur',
-            text: e?.message || 'Erreur inconnue',
-            confirmButtonColor: '#465fff',
-          });
+            toast.error({ title: 'Erreur', text: e?.message || 'Erreur inconnue' });
         } finally {
             setSubmitting(false);
         }
@@ -166,87 +138,73 @@ export default function AdminUsersPage() {
 
     const onCreate = async () => {
         if (!createDateNaissance) {
-            Swal.fire({ icon: 'warning', title: 'Attention', text: 'La date de naissance est obligatoire' });
+            toast.warning({ title: 'Attention', text: 'La date de naissance est obligatoire' });
             return;
         }
 
         setSubmitting(true);
         try {
-          const token = localStorage.getItem('token');
-          const res = await fetch(`${API_BASE_URL}/employee`, {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              nom: createNom,
-              prenom: createPrenom,
-              sexe: createSexe,
-              date_naissance: createDateNaissance,
-              contact: createContact,
-              email: createEmail,
-              fonction: createFonction,
-            }),
-          });
-          const json = await res.json();
-          if (!res.ok) throw new Error(json?.error || json?.message || 'Impossible de créer');
-    
-          toast.fire({ icon: 'success', title: 'Employé créé' });
-    
-          setCreateOpen(false);
-          setCreateNom('');
-          setCreatePrenom('');
-          setCreateSexe('HOMME');
-          setCreateDateNaissance('');
-          setCreateContact('');
-          setCreateEmail('');
-          setCreateFonction('');
-          await load();
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/employee`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    nom: createNom,
+                    prenom: createPrenom,
+                    sexe: createSexe,
+                    date_naissance: createDateNaissance,
+                    contact: createContact,
+                    email: createEmail,
+                    fonction: createFonction,
+                }),
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json?.error || json?.message || 'Impossible de créer');
+
+            toast.success({ title: 'Employé créé' });
+
+            setCreateOpen(false);
+            setCreateNom('');
+            setCreatePrenom('');
+            setCreateSexe('HOMME');
+            setCreateDateNaissance('');
+            setCreateContact('');
+            setCreateEmail('');
+            setCreateFonction('');
+            await load();
         } catch (e: any) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Erreur',
-            text: e?.message || 'Erreur inconnue',
-            confirmButtonColor: '#465fff',
-          });
+            toast.error({ title: 'Erreur', text: e?.message || 'Erreur inconnue' });
         } finally {
             setSubmitting(false);
         }
     };
 
     const onDelete = async (id: string) => {
-        const confirm = await Swal.fire({
-          icon: 'warning',
-          title: 'Supprimer cet employé ?',
-          text: 'Action irréversible.',
-          showCancelButton: true,
-          confirmButtonText: 'Supprimer',
-          cancelButtonText: 'Annuler',
-          confirmButtonColor: '#111827',
+        const confirm = await confirmDialog({
+            icon: 'warning',
+            title: 'Supprimer cet employé ?',
+            text: 'Action irréversible.',
+            confirmButtonText: 'Supprimer',
+            confirmButtonColor: '#111827',
         });
         if (!confirm.isConfirmed) return;
-    
+
         try {
-          const token = localStorage.getItem('token');
-          const res = await fetch(`${API_BASE_URL}/employee/${encodeURIComponent(id)}`, { 
-            method: 'DELETE',
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          const json = await res.json();
-          if (!res.ok) throw new Error(json?.error || json?.message || 'Impossible de supprimer');
-    
-          toast.fire({ icon: 'success', title: 'Employé supprimé' });
-          await load();
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/employee/${encodeURIComponent(id)}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json?.error || json?.message || 'Impossible de supprimer');
+
+            toast.success({ title: 'Employé supprimé' });
+            await load();
         } catch (e: any) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Erreur',
-            text: e?.message || 'Erreur inconnue',
-            confirmButtonColor: '#465fff',
-          });
+            toast.error({ title: 'Erreur', text: e?.message || 'Erreur inconnue' });
         }
     };
 
@@ -273,7 +231,7 @@ export default function AdminUsersPage() {
                         <input
                             value={q}
                             onChange={(e) => setQ(e.target.value)}
-                            placeholder="Rechercher ( nom, prenom,email, fonction, id)"
+                            placeholder="Rechercher ( nom, prenom, email, fonction, id)"
                             className="w-full sm:w-[360px] rounded-2xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-900 shadow-sm outline-none ring-offset-2 focus:ring-2 focus:ring-accent-500"
                         />
                     </div>

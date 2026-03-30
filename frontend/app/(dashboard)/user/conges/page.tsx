@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import Swal from 'sweetalert2';
 import AdminPageHeader from '@/components/shared/admin/AdminPageHeader';
 import AdminCard from '@/components/shared/admin/AdminCard';
 import AdminSection from '@/components/shared/admin/AdminSection';
@@ -9,15 +8,7 @@ import UserCongeTable from '@/components/features/user/conges/UserCongeTable';
 import CongeFormModal from '@/components/features/user/conges/CongeFormModal';
 import { CongeRow } from '@/components/features/admin/conges/types';
 import { API_BASE_URL } from '@/lib/api-config';
-
-const toast = Swal.mixin({
-    toast: true,
-    position: 'top',
-    showConfirmButton: false,
-    timer: 1600,
-    timerProgressBar: true,
-    customClass: { container: 'z-[999999]' },
-});
+import { toast } from '@/lib/toast';
 
 export default function UserCongesPage() {
     const [loading, setLoading] = useState(true);
@@ -28,17 +19,17 @@ export default function UserCongesPage() {
     const load = async () => {
         setLoading(true);
         try {
-          const token = localStorage.getItem('token');
-          const res = await fetch(`${API_BASE_URL}/conge/my-requests`, { 
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          const json = await res.json();
-          if (!res.ok) throw new Error(json?.message || 'Erreur lors du chargement');
-          setItems(json || []);
+            const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+            const res = await fetch(`${API_BASE_URL}/conge/my-requests`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json?.message || 'Erreur lors du chargement');
+            setItems(json || []);
         } catch (e: any) {
-          Swal.fire({ icon: 'error', title: 'Erreur', text: e?.message });
+            toast.error({ title: 'Erreur', text: e?.message });
         } finally {
-          setLoading(false);
+            setLoading(false);
         }
     };
 
@@ -52,20 +43,20 @@ export default function UserCongesPage() {
             const token = localStorage.getItem('token');
             const res = await fetch(`${API_BASE_URL}/conge`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(data),
             });
             const json = await res.json();
             if (!res.ok) throw new Error(json?.message || 'Impossible de soumettre la demande');
 
-            toast.fire({ icon: 'success', title: 'Demande envoyée' });
+            toast.success({ title: 'Demande envoyée' });
             setIsModalOpen(false);
             load();
         } catch (e: any) {
-            Swal.fire({ icon: 'error', title: 'Erreur', text: e.message });
+            toast.error({ title: 'Erreur', text: e.message });
         } finally {
             setSubmitting(false);
         }
@@ -101,11 +92,11 @@ export default function UserCongesPage() {
                 ) : null}
             </AdminCard>
 
-            <CongeFormModal 
-                isOpen={isModalOpen} 
-                onClose={() => setIsModalOpen(false)} 
-                onSubmit={onSubmit} 
-                isLoading={submitting} 
+            <CongeFormModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSubmit={onSubmit}
+                isLoading={submitting}
             />
         </AdminSection>
     );

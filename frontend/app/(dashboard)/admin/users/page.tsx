@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import Swal from 'sweetalert2';
 import AdminGate from '@/components/features/admin/users/AdminGate';
 import UsersTable from '@/components/features/admin/users/UsersTable';
 import UserFormModal from '@/components/features/admin/users/UserFormModal';
@@ -10,19 +9,7 @@ import AdminPageHeader from '@/components/shared/admin/AdminPageHeader';
 import AdminCard from '@/components/shared/admin/AdminCard';
 import AdminSection from '@/components/shared/admin/AdminSection';
 import { API_BASE_URL } from '@/lib/api-config';
-
-const toast = Swal.mixin({
-  toast: true,
-  position: 'top',
-  showConfirmButton: false,
-  timer: 1600,
-  timerProgressBar: true,
-  customClass: { container: 'z-[999999]' },
-  didOpen: () => {
-    const el = document.querySelector('.swal2-container') as HTMLElement | null;
-    if (el) el.style.zIndex = '999999';
-  },
-});
+import { toast, confirmDialog } from '@/lib/toast';
 
 export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
@@ -54,23 +41,16 @@ export default function AdminUsersPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE_URL}/users`, { 
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const res = await fetch(`${API_BASE_URL}/users`, {
         cache: 'no-store',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || 'Impossible de charger les utilisateurs');
       setItems((json ?? []) as UserRow[]);
     } catch (e: any) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Erreur',
-        text: e?.message || 'Erreur inconnue',
-        confirmButtonColor: '#465fff',
-      });
+      toast.error({ title: 'Erreur', text: e?.message || 'Erreur inconnue' });
     } finally {
       setLoading(false);
     }
@@ -97,26 +77,22 @@ export default function AdminUsersPage() {
   const onEdit = async () => {
     setSubmitting(true);
     try {
-      const payload: any = {
-        name: editName,
-        role: editRole,
-      };
+      const payload: any = { name: editName, role: editRole };
       if (editPassword.trim()) payload.password = editPassword;
 
       const token = localStorage.getItem('token');
       const res = await fetch(`${API_BASE_URL}/users/${encodeURIComponent(editId)}`, {
         method: 'PUT',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(payload),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || json?.message || 'Impossible de modifier');
 
-      toast.fire({ icon: 'success', title: 'Utilisateur modifié' });
-
+      toast.success({ title: 'Utilisateur modifié' });
       setEditOpen(false);
       setEditId('');
       setEditName('');
@@ -124,12 +100,7 @@ export default function AdminUsersPage() {
       setEditPassword('');
       await load();
     } catch (e: any) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Erreur',
-        text: e?.message || 'Erreur inconnue',
-        confirmButtonColor: '#465fff',
-      });
+      toast.error({ title: 'Erreur', text: e?.message || 'Erreur inconnue' });
     } finally {
       setSubmitting(false);
     }
@@ -141,70 +112,51 @@ export default function AdminUsersPage() {
       const token = localStorage.getItem('token');
       const res = await fetch(`${API_BASE_URL}/users`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          name: createName,
-          password: createPassword,
-          role: createRole,
-        }),
+        body: JSON.stringify({ name: createName, password: createPassword, role: createRole }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || json?.message || 'Impossible de créer');
 
-      toast.fire({ icon: 'success', title: 'Utilisateur créé' });
-
+      toast.success({ title: 'Utilisateur créé' });
       setCreateOpen(false);
       setCreateName('');
       setCreatePassword('');
       setCreateRole('USER');
       await load();
     } catch (e: any) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Erreur',
-        text: e?.message || 'Erreur inconnue',
-        confirmButtonColor: '#465fff',
-      });
+      toast.error({ title: 'Erreur', text: e?.message || 'Erreur inconnue' });
     } finally {
       setSubmitting(false);
     }
   };
 
   const onDelete = async (id: string) => {
-    const confirm = await Swal.fire({
+    const confirm = await confirmDialog({
       icon: 'warning',
       title: 'Supprimer cet utilisateur ?',
       text: 'Action irréversible.',
-      showCancelButton: true,
       confirmButtonText: 'Supprimer',
-      cancelButtonText: 'Annuler',
       confirmButtonColor: '#111827',
     });
     if (!confirm.isConfirmed) return;
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE_URL}/users/${encodeURIComponent(id)}`, { 
+      const res = await fetch(`${API_BASE_URL}/users/${encodeURIComponent(id)}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || json?.message || 'Impossible de supprimer');
 
-      toast.fire({ icon: 'success', title: 'Utilisateur supprimé' });
+      toast.success({ title: 'Utilisateur supprimé' });
       await load();
     } catch (e: any) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Erreur',
-        text: e?.message || 'Erreur inconnue',
-        confirmButtonColor: '#465fff',
-      });
+      toast.error({ title: 'Erreur', text: e?.message || 'Erreur inconnue' });
     }
   };
 

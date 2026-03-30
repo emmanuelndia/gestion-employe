@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { EmployeeRow } from "../../employees/types";
+import { EmployeeRow } from "../employees/types";
 import { PresenceStatus } from "./types";
 
 type PresenceFormModalProps = {

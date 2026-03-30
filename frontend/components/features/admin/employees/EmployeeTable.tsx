@@ -32,7 +32,7 @@ export default function EmployeesTable({ employees, onEdit, onDelete }: Employee
               <td className="px-6 py-4">
                 <SexeBadge sexe={sexeLabel(e.sexe)} />
               </td>
-              <td className="px-6 py-4 text-sm text-zinc-600">{new Date(e.date_naissance).toLocaleDateString("fr-FR")}</td>
+              <td className="px-6 py-4 text-sm text-zinc-600">{e.date_naissance ? new Date(e.date_naissance).toLocaleDateString("fr-FR") : "—"}</td>
               <td className="px-6 py-4 text-sm text-zinc-600">{e.contact || "—"}</td>
               <td className="px-6 py-4 text-sm text-zinc-600">{e.fonction || "—"}</td>
               <td className="px-6 py-4 text-right">

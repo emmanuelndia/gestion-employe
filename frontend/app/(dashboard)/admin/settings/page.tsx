@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import Swal from 'sweetalert2';
 import AdminPageHeader from '@/components/shared/admin/AdminPageHeader';
 import SettingsForm from '@/components/features/admin/settings/SettingsForm';
 
@@ -51,6 +50,8 @@ export default function AdminSettingsPage() {
     if (!canSubmit) return;
 
     setLoading(true);
+    const Swal = (await import('sweetalert2')).default;
+
     try {
       const res = await fetch('/api/admin/settings', {
         method: 'POST',

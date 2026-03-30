@@ -5,9 +5,7 @@ import Label from "../form/Label";
 import Button from "../ui/button/Button";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import React, { useState } from "react";
-import Swal from "sweetalert2";
 import { BackButton } from "@/components/ui/button";
-
 import { API_BASE_URL } from "@/lib/api-config";
 
 export default function SignInForm() {
@@ -20,6 +18,7 @@ export default function SignInForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const Swal = (await import("sweetalert2")).default;
 
     if (!isFormValid) {
       Swal.fire({
@@ -38,10 +37,9 @@ export default function SignInForm() {
     setIsLoading(true);
 
     try {
-      // Appel à votre API d'authentification
       const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
         },
@@ -64,7 +62,6 @@ export default function SignInForm() {
         return;
       }
 
-      // Connexion réussie
       Swal.fire({
         icon: "success",
         title: "Connexion réussie",
@@ -75,29 +72,26 @@ export default function SignInForm() {
         customClass: { container: "z-[999999]" },
       });
 
-      // Stocker les infos dans localStorage
       localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("token", data.token || data.session?.access_token || '');
       localStorage.setItem("role", data.user.role);
-      
-      // Stocker dans les cookies avec des options complètes
+
       const cookieOptions = `path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
       document.cookie = `user=${encodeURIComponent(JSON.stringify(data.user))}; ${cookieOptions}`;
       document.cookie = `role=${data.user.role}; ${cookieOptions}`;
       document.cookie = `token=${data.token || data.session?.access_token || ''}; ${cookieOptions}`;
-      
-      // Attendre un peu pour que les cookies soient bien définis
+
       setTimeout(() => {
-        // Redirection selon le rôle
         if (data.user.role === "ADMIN") {
-          window.location.href = "/admin"; // Utiliser window.location pour recharger la page
+          window.location.href = "/admin";
         } else {
           window.location.href = "/user";
         }
       }, 500);
     } catch (error) {
       console.error("Erreur de connexion:", error);
-      Swal.fire({
+      const Swal2 = (await import("sweetalert2")).default;
+      Swal2.fire({
         icon: "error",
         title: "Erreur réseau",
         text: "Impossible de contacter le serveur. Vérifiez votre connexion.",
@@ -126,7 +120,7 @@ export default function SignInForm() {
 
       <div className="mt-8">
         <h1 className="text-3xl font-semibold tracking-tight text-zinc-900">Connexion</h1>
-        <p className="mt-2 text-sm text-zinc-600">Accédez au panneau d’administration.</p>
+        <p className="mt-2 text-sm text-zinc-600">Accédez au panneau d'administration.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-8">
@@ -181,7 +175,7 @@ export default function SignInForm() {
           <div>
             <Button
               className="
-                w-full 
+                w-full
                 bg-zinc-900
                 hover:!bg-zinc-800
                 text-white
@@ -209,7 +203,7 @@ export default function SignInForm() {
           </div>
 
           <div className="pt-2 text-sm text-zinc-600">
-            Besoin d’un accès ? Contactez l’administrateur.
+            Besoin d'un accès ? Contactez l'administrateur.
           </div>
         </div>
       </form>

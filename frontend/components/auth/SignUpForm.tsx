@@ -5,7 +5,6 @@ import Label from "../form/Label";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Link from "next/link";
 import React, { useState } from "react";
-import Swal from "sweetalert2";
 import { BackButton } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/api-config";
@@ -22,19 +21,17 @@ export default function SignUpForm() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const isFormValid = 
-    formData.name.trim() !== "" && 
-    formData.password.trim() !== "" && 
+  const isFormValid =
+    formData.name.trim() !== "" &&
+    formData.password.trim() !== "" &&
     isChecked;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const Swal = (await import("sweetalert2")).default;
 
     if (!isFormValid) {
       Swal.fire({
@@ -55,14 +52,14 @@ export default function SignUpForm() {
     try {
       const res = await fetch(`${API_BASE_URL}/auth/users`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Accept": "application/json"
         },
         body: JSON.stringify({
           name: formData.name,
           password: formData.password,
-          role: "ADMIN" // Premier utilisateur sera admin
+          role: "ADMIN"
         }),
       });
 
@@ -82,7 +79,6 @@ export default function SignUpForm() {
         return;
       }
 
-      // Inscription réussie
       Swal.fire({
         icon: "success",
         title: "Compte créé avec succès!",
@@ -94,14 +90,14 @@ export default function SignUpForm() {
         customClass: { container: "z-[999999]" },
       });
 
-      // Redirection vers la page de connexion
       setTimeout(() => {
         router.push("/login");
       }, 1500);
 
     } catch (error) {
       console.error("Erreur d'inscription:", error);
-      Swal.fire({
+      const Swal2 = (await import("sweetalert2")).default;
+      Swal2.fire({
         icon: "error",
         title: "Erreur réseau",
         text: "Impossible de contacter le serveur. Vérifiez votre connexion.",
@@ -116,23 +112,12 @@ export default function SignUpForm() {
     }
   };
 
-  const handleGoogleSignUp = () => {
+  const handleSocialNotAvailable = async (provider: string) => {
+    const Swal = (await import("sweetalert2")).default;
     Swal.fire({
       icon: "info",
       title: "Bientôt disponible",
-      text: "L'inscription avec Google sera disponible prochainement.",
-      position: "top",
-      timer: 3000,
-      showConfirmButton: false,
-      toast: true,
-    });
-  };
-
-  const handleTwitterSignUp = () => {
-    Swal.fire({
-      icon: "info",
-      title: "Bientôt disponible",
-      text: "L'inscription avec X (Twitter) sera disponible prochainement.",
+      text: `L'inscription avec ${provider} sera disponible prochainement.`,
       position: "top",
       timer: 3000,
       showConfirmButton: false,
@@ -160,7 +145,6 @@ export default function SignUpForm() {
       <form onSubmit={handleSubmit} className="mt-8">
         <div className="space-y-5">
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            
             <div className="sm:col-span-1">
               <Label>
                 Login<span className="text-error-500">*</span>
@@ -176,8 +160,6 @@ export default function SignUpForm() {
               />
             </div>
           </div>
-
-          
 
           <div>
             <Label>

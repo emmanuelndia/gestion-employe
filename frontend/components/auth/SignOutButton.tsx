@@ -1,14 +1,14 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
-import Swal from 'sweetalert2';
 
 export default function SignOutButton() {
   const router = useRouter();
 
   const handleSignOut = async () => {
     try {
-      // Afficher une confirmation
+      const Swal = (await import('sweetalert2')).default;
+
       const result = await Swal.fire({
         title: 'Déconnexion',
         text: 'Êtes-vous sûr de vouloir vous déconnecter ?',
@@ -21,17 +21,14 @@ export default function SignOutButton() {
       });
 
       if (result.isConfirmed) {
-        // Effacer les cookies
         document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         document.cookie = 'role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-        
-        // Effacer localStorage
+
         localStorage.removeItem('user');
         localStorage.removeItem('token');
         localStorage.removeItem('role');
 
-        // Message de succès
         await Swal.fire({
           icon: 'success',
           title: 'Déconnecté',
@@ -40,11 +37,11 @@ export default function SignOutButton() {
           showConfirmButton: false,
         });
 
-        // Rediriger vers la page de connexion
         router.push('/login');
       }
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
+      const Swal = (await import('sweetalert2')).default;
       Swal.fire({
         icon: 'error',
         title: 'Erreur',

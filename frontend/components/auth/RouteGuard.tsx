@@ -3,7 +3,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Swal from 'sweetalert2';
 
 const useAuth = () => {
   const [user, setUser] = useState<any>(null);
@@ -46,10 +45,10 @@ interface RouteGuardProps {
   requiredPermissions?: string[];
 }
 
-export function RouteGuard({ 
-  children, 
-  requiredRole, 
-  requiredPermissions = [] 
+export function RouteGuard({
+  children,
+  requiredRole,
+  requiredPermissions = []
 }: RouteGuardProps) {
   const { user, loading, hasPermission, refresh } = useAuth();
   const router = useRouter();
@@ -81,39 +80,40 @@ export function RouteGuard({
 
   useEffect(() => {
     if (!loading) {
-      // Vérifier si l'utilisateur est connecté
       if (!user) {
         router.replace('/login');
         return;
       }
 
-      // Vérifier le rôle si spécifié
       if (requiredRole && String(user.role || '').toLowerCase() !== requiredRole) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Permission refusée',
-          text: `Vous devez être ${requiredRole} pour accéder à cette page.`,
-          confirmButtonColor: '#465fff',
-        }).then(() => {
-          router.replace(String(user.role || '').toLowerCase() === 'admin' ? '/admin' : '/user');
+        import('sweetalert2').then(({ default: Swal }) => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Permission refusée',
+            text: `Vous devez être ${requiredRole} pour accéder à cette page.`,
+            confirmButtonColor: '#465fff',
+          }).then(() => {
+            router.replace(String(user.role || '').toLowerCase() === 'admin' ? '/admin' : '/user');
+          });
         });
         return;
       }
 
-      // Vérifier les permissions si spécifiées
       if (requiredPermissions.length > 0) {
-        const hasAllPermissions = requiredPermissions.every(permission => 
+        const hasAllPermissions = requiredPermissions.every(permission =>
           hasPermission(permission)
         );
-        
+
         if (!hasAllPermissions) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Permissions insuffisantes',
-            text: 'Vous ne disposez pas des permissions nécessaires.',
-            confirmButtonColor: '#465fff',
-          }).then(() => {
-            router.replace(String(user.role || '').toLowerCase() === 'admin' ? '/admin' : '/user');
+          import('sweetalert2').then(({ default: Swal }) => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Permissions insuffisantes',
+              text: 'Vous ne disposez pas des permissions nécessaires.',
+              confirmButtonColor: '#465fff',
+            }).then(() => {
+              router.replace(String(user.role || '').toLowerCase() === 'admin' ? '/admin' : '/user');
+            });
           });
           return;
         }
@@ -130,7 +130,7 @@ export function RouteGuard({
   }
 
   if (!user) {
-    return null; // Redirection en cours
+    return null;
   }
 
   return <>{children}</>;

@@ -6,7 +6,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class EmployeeService {
     constructor(private prisma: PrismaService) {}
 
-    // Fonction pour récuperer les employés
+    // Récuperer les employés
     async getEmployees() {
         try{
             const employees = await this.prisma.employee.findMany();
@@ -20,7 +20,7 @@ export class EmployeeService {
         }
     }
 
-    // Fonction pour récuperer un employe par id
+    // Récuperer un employe par id
     async getEmployeeById(id: number) {
         try{
             const employee = await this.prisma.employee.findUnique({
@@ -59,7 +59,7 @@ export class EmployeeService {
         }
     }
 
-    // Fonction pour mettre à jour un employé
+    // Mettre à jour un employé
     async update(id: number, employee: Employee) {
         try {
             const dateNaissance = new Date(employee.date_naissance);
@@ -87,7 +87,7 @@ export class EmployeeService {
 
 
     
-    // Fonction pour supprimer un employé
+    // Supprimer un employé
     async delete(id: number) {
         try {
             await this.prisma.employee.delete({

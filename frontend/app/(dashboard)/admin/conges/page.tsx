@@ -15,7 +15,6 @@ export default function AdminCongesPage() {
     const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
     const [mounted, setMounted] = useState(false);
 
-    // toast initialisé en lazy (import dynamique) pour éviter l'erreur de prerendering
     const toastRef = useRef<any>(null);
 
     const getToast = async () => {
